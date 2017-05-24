@@ -1,0 +1,14 @@
+{
+  "name": "shipmaster",
+  "version": "0.0.1",
+  "description": "All the shipping APIs you could ever want in one place.",
+  "main": "index.js",
+  "author": "Joseph Wolff",
+  "license": "MIT",
+  "dependencies": {
+    "extend": "^3.0.1",
+    "ip": "^1.1.5",
+    "util": "^0.10.3",
+    "xml2js": "^0.4.17"
+  }
+}
