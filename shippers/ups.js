@@ -47,35 +47,44 @@ const _handleResponse = function(res, callback) {
 };
 
 const _doRequest = function(reqBody, options, callback) {
-  let authorize = _buildAccessRequest(options);
-  let body = `<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>${authorize}<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>${reqBody}`;
-  let params = {
-    host: options.hostname,
-    path: options.path,
-    method: 'POST',
-    headers: {
-      'Content-Length': body.length,
-      'Content-Type': 'text/xml',
-      'User-Agent': options.user_agent
-    }
-  };
-  let req = https.request(params);
-  req.write(body);
+  return new Promise((resolve, reject) => {
+    let authorize = _buildAccessRequest(options);
+    let body = `<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>${authorize}<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>${reqBody}`;
+    let params = {
+      host: options.hostname,
+      path: options.path,
+      method: 'POST',
+      headers: {
+        'Content-Length': body.length,
+        'Content-Type': 'text/xml',
+        'User-Agent': options.user_agent
+      }
+    };
+    let req = https.request(params);
+    req.write(body);
 
-  req.on('error', function(e) {
-    return callback(e, null);
-  });
-  req.on('response', function(res) {
-    let resData = '';
-    res.on('data', function(data) {
-      resData += data.toString();
+    req.on('error', e => {
+      console.log('ERROR!', e.message);
+      reject(e);
     });
+    req.on('response', res => {
+      let resData = '';
+      res.on('data', data => {
+        resData += data.toString();
+      });
 
-    res.on('end', function(data) {
-      parser.parseString(resData, { explicitArray: false }, callback);
+      res.on('end', data => {
+        parser.parseString(resData, { explicitArray: false }, (err, res) => {
+          if (err) {
+            console.log('Parse error', err.message);
+            reject(err);
+          }
+          resolve(res);
+        });
+      });
     });
+    req.end();
   });
-  req.end();
 };
 
 class UPS {
@@ -97,12 +106,7 @@ class UPS {
   }
   track(data, callback) {
     const request = _buildTrackingRequest(data, this.options);
-    _doRequest(request, this.options, function(err, res) {
-      if (err) {
-        return callback(err, null);
-      }
-      return _handleResponse(res, callback);
-    });
+    return _doRequest(request, this.options);
   }
 }
 module.exports = UPS;

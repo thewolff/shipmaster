@@ -52,7 +52,6 @@ const _doRequest = function(body, options) {
           resData,
           { explicitArray: false },
           (err, res) => {
-            console.log('res', res);
             resolve(res);
           }
         );
@@ -83,9 +82,9 @@ class USPS {
     this.options = Object.assign({}, this.defaults, args);
   }
 
-  async track(data) {
+  track(data) {
     const request = _buildTrackingRequest(data, this.options);
-    return await _doRequest(request, this.options);
+    return _doRequest(request, this.options);
   }
 }
 
