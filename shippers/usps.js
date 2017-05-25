@@ -25,30 +25,41 @@ const _handleResponse = function(res, callback) {
   return callback(null, res);
 };
 
-const _doRequest = function(body, options, callback) {
-  let req = https.request({
-    host: options.hostname,
-    path: `${options.endpoint}?API=${options.api}&XML=${encodeURIComponent(options.xmlVersion)}${encodeURIComponent(body)}`,
-    method: 'GET',
-    headers: {
-      'User-Agent': options.user_agent
-    }
-  });
-
-  req.on('error', function(e) {
-    return callback(e, null);
-  });
-  req.on('response', function(res) {
-    let resData = '';
-    res.on('data', function(data) {
-      resData += data.toString();
+const _doRequest = function(body, options) {
+  return new Promise((resolve, reject) => {
+    let req = https.request({
+      host: options.hostname,
+      path: `${options.endpoint}?API=${options.api}&XML=${encodeURIComponent(options.xmlVersion)}${encodeURIComponent(body)}`,
+      method: 'GET',
+      headers: {
+        'User-Agent': options.user_agent
+      }
     });
 
-    res.on('end', function(data) {
-      parser.parseString(resData, { explicitArray: false }, callback);
+    req.on('error', e => {
+      console.log('ERROR!', e.message);
+      reject(e);
     });
+    req.on('response', function(res) {
+      let resData = '';
+      res.on('data', function(data) {
+        resData += data.toString();
+      });
+
+      res.on('end', function(data) {
+        let result = '';
+        let parsed = parser.parseString(
+          resData,
+          { explicitArray: false },
+          (err, res) => {
+            console.log('res', res);
+            resolve(res);
+          }
+        );
+      });
+    });
+    req.end();
   });
-  req.end();
 };
 
 class USPS {
@@ -72,13 +83,10 @@ class USPS {
     this.options = Object.assign({}, this.defaults, args);
   }
 
-  track(data, callback) {
+  track(data) {
     const request = _buildTrackingRequest(data, this.options);
-    _doRequest(request, this.options, function(err, res) {
-      if (err) {
-        return callback(err, null);
-      }
-      return _handleResponse(res, callback);
+    _doRequest(request, this.options).then(data => {
+      console.log('done', data);
     });
   }
 }
