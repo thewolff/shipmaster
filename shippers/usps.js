@@ -83,11 +83,9 @@ class USPS {
     this.options = Object.assign({}, this.defaults, args);
   }
 
-  track(data) {
+  async track(data) {
     const request = _buildTrackingRequest(data, this.options);
-    _doRequest(request, this.options).then(data => {
-      console.log('done', data);
-    });
+    return await _doRequest(request, this.options);
   }
 }
 
