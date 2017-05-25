@@ -21,10 +21,6 @@ const _buildTrackingRequest = function(data, options) {
   return root.end({ pretty: options.pretty });
 };
 
-const _handleResponse = function(res, callback) {
-  return callback(null, res);
-};
-
 const _doRequest = function(body, options) {
   return new Promise((resolve, reject) => {
     let req = https.request({
@@ -52,6 +48,10 @@ const _doRequest = function(body, options) {
           resData,
           { explicitArray: false },
           (err, res) => {
+            if (err) {
+              console.log('Parse error', err.message);
+              reject(err);
+            }
             resolve(res);
           }
         );
