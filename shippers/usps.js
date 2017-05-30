@@ -49,7 +49,6 @@ const _doRequest = function(body, options, id) {
           data: {}
         };
 
-        console.log('my res', result);
         parser.parseString(resData, { explicitArray: false }, (err, res) => {
           if (err) {
             console.log('Parse error', err.message);
