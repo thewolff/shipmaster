@@ -21,7 +21,7 @@ const _buildTrackingRequest = function(data, options) {
   return root.end({ pretty: options.pretty });
 };
 
-const _doRequest = function(body, options) {
+const _doRequest = function(body, options, id) {
   return new Promise((resolve, reject) => {
     let req = https.request({
       host: options.hostname,
@@ -43,18 +43,21 @@ const _doRequest = function(body, options) {
       });
 
       res.on('end', function(data) {
-        let result = '';
-        let parsed = parser.parseString(
-          resData,
-          { explicitArray: false },
-          (err, res) => {
-            if (err) {
-              console.log('Parse error', err.message);
-              reject(err);
-            }
-            resolve(res);
+        let result = {
+          shipper: 'USPS',
+          trackingId: id,
+          data: {}
+        };
+
+        console.log('my res', result);
+        parser.parseString(resData, { explicitArray: false }, (err, res) => {
+          if (err) {
+            console.log('Parse error', err.message);
+            reject(err);
           }
-        );
+          result.data = res;
+          resolve(result);
+        });
       });
     });
     req.end();
@@ -84,7 +87,7 @@ class USPS {
 
   track(data) {
     const request = _buildTrackingRequest(data, this.options);
-    return _doRequest(request, this.options);
+    return _doRequest(request, this.options, data);
   }
 }
 

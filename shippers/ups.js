@@ -46,7 +46,7 @@ const _handleResponse = function(res, callback) {
   return callback(null, res);
 };
 
-const _doRequest = function(reqBody, options, callback) {
+const _doRequest = function(reqBody, options, id) {
   return new Promise((resolve, reject) => {
     let authorize = _buildAccessRequest(options);
     let body = `<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>${authorize}<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>${reqBody}`;
@@ -74,12 +74,18 @@ const _doRequest = function(reqBody, options, callback) {
       });
 
       res.on('end', data => {
+        let result = {
+          shipper: 'UPS',
+          trackingId: id,
+          data: {}
+        };
         parser.parseString(resData, { explicitArray: false }, (err, res) => {
           if (err) {
             console.log('Parse error', err.message);
             reject(err);
           }
-          resolve(res);
+          result.data = res;
+          resolve(result);
         });
       });
     });
@@ -106,7 +112,7 @@ class UPS {
   }
   track(data, callback) {
     const request = _buildTrackingRequest(data, this.options);
-    return _doRequest(request, this.options);
+    return _doRequest(request, this.options, data);
   }
 }
 module.exports = UPS;
