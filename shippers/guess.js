@@ -100,8 +100,8 @@ let _confirmFedex20 = function(id) {
   if (_checkDigit(id, [3, 1, 7], 11)) {
     return [true, false];
   } else {
-    let alteredid = `92${id}`;
-    if (_checkDigit(alteredid, [3, 1], 10)) {
+    let alteredId = `92${id}`;
+    if (_checkDigit(alteredId, [3, 1], 10)) {
       return [true, false];
     }
   }
