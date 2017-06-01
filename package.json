@@ -6,8 +6,10 @@
   "author": "Joseph Wolff",
   "license": "MIT",
   "dependencies": {
+    "change-case": "^3.0.1",
     "extend": "^3.0.1",
     "ip": "^1.1.5",
+    "lodash": "^4.17.4",
     "util": "^0.10.3",
     "xml2js": "^0.4.17"
   }

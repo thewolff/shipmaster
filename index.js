@@ -1,6 +1,7 @@
 'use strict';
 const USPS = require('./shippers/usps');
 const UPS = require('./shippers/ups');
+const guess = require('./shippers/guess');
 
 class Shipmaster {
   constructor(args) {}
@@ -10,6 +11,9 @@ class Shipmaster {
   }
   UPS(args) {
     return new UPS(args);
+  }
+  guess(args) {
+    return new guess(args);
   }
 }
 
