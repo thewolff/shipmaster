@@ -5,17 +5,43 @@ const _ = require('lodash');
 const upperCase = require('change-case').upperCase;
 const uniq = require('lodash').uniq;
 
-const _checkDigit = (id, multi, mod) => {
-  var checkdigit, index, midx, sum, _i, _ref;
-  midx = 0;
-  sum = 0;
+let _preprocess = id => upperCase(id.replace(/\s+/g, ''));
+
+let _confirmUps = function(id) {
+  let sum = 0;
+  for (let index = 2; index <= 16; index++) {
+    var num;
+    let asciiValue = id[index].charCodeAt(0);
+    if (asciiValue >= 48 && asciiValue <= 57) {
+      num = parseInt(id[index], 10);
+    } else {
+      num = (asciiValue - 63) % 10;
+    }
+
+    if (index % 2 !== 0) {
+      num = num * 2;
+    }
+    sum += num;
+  }
+
+  let checkdigit = sum % 10 > 0 ? 10 - sum % 10 : 0;
+  if (checkdigit === parseInt(id[17], 10)) {
+    return [true, true];
+  }
+  return [false, false];
+};
+
+let _checkDigit = function(id, multipliers, mod) {
+  let checkdigit;
+  let midx = 0;
+  let sum = 0;
   for (
-    (index = _i = 0), (_ref = id.length - 2);
-    0 <= _ref ? _i <= _ref : _i >= _ref;
-    index = 0 <= _ref ? ++_i : --_i
+    let index = 0, end = id.length - 2, asc = 0 <= end;
+    asc ? index <= end : index >= end;
+    asc ? index++ : index--
   ) {
-    sum += parseInt(id[index], 10) * multi[midx];
-    midx = midx === multi.length - 1 ? 0 : midx + 1;
+    sum += parseInt(id[index], 10) * multipliers[midx];
+    midx = midx === multipliers.length - 1 ? 0 : midx + 1;
   }
   if (mod === 11) {
     checkdigit = sum % 11;
@@ -32,59 +58,49 @@ const _checkDigit = (id, multi, mod) => {
   return checkdigit === parseInt(id[id.length - 1]);
 };
 
-const _confirmUps = id => {
-  var asciiValue, checkdigit, index, num, sum, _i;
-  sum = 0;
-  for (index = _i = 2; _i <= 16; index = ++_i) {
-    asciiValue = id[index].charCodeAt(0);
-    if (asciiValue >= 48 && asciiValue <= 57) {
-      num = parseInt(id[index], 10);
-    } else {
-      num = (asciiValue - 63) % 10;
-    }
-    if (index % 2 !== 0) {
-      num = num * 2;
-    }
-    sum += num;
-  }
-  checkdigit = sum % 10 > 0 ? 10 - sum % 10 : 0;
-  if (checkdigit === parseInt(id[17], 10)) {
-    return [true, true];
-  }
-  return [false, false];
-};
-
-const _confirmUpsFreight = id => {
-  var firstChar, remaining;
-  firstChar = '' + (id.charCodeAt(0) - 63) % 10;
-  remaining = id.slice(1);
-  id = '' + firstChar + remaining;
+let _confirmUpsFreight = function(id) {
+  let firstChar = `${(id.charCodeAt(0) - 63) % 10}`;
+  let remaining = id.slice(1);
+  id = `${firstChar}${remaining}`;
   if (_checkDigit(id, [3, 1, 7], 10)) {
     return [true, true];
   }
   return [false, false];
 };
 
-const _confirmFedex12 = id => {
+let _confirmFedex12 = function(id) {
   if (_checkDigit(id, [3, 1, 7], 11)) {
     return [true, false];
   }
   return [false, false];
 };
 
-const _confirmFedex15 = id => {
+let _confirmFedexDoorTag = function(id) {
+  if (_checkDigit(id.match(/^DT(\d{12})$/)[1], [3, 1, 7], 11)) {
+    return [true, true];
+  }
+  return [false, false];
+};
+
+let _confirmFedexSmartPost = function(id) {
+  if (_checkDigit(`91${id}`, [3, 1], 10)) {
+    return [true, false];
+  }
+  return [false, false];
+};
+
+let _confirmFedex15 = function(id) {
   if (_checkDigit(id, [1, 3], 10)) {
     return [true, false];
   }
   return [false, false];
 };
 
-const _confirmFedex20 = id => {
-  var alteredid;
+let _confirmFedex20 = function(id) {
   if (_checkDigit(id, [3, 1, 7], 11)) {
     return [true, false];
   } else {
-    alteredid = '92' + id;
+    let alteredid = `92${id}`;
     if (_checkDigit(alteredid, [3, 1], 10)) {
       return [true, false];
     }
@@ -92,21 +108,14 @@ const _confirmFedex20 = id => {
   return [false, false];
 };
 
-const _confirmFedexSmartPost = id => {
-  if (_checkDigit('91' + id, [3, 1], 10)) {
+let _confirmUsps20 = function(id) {
+  if (_checkDigit(id, [3, 1], 10)) {
     return [true, false];
   }
   return [false, false];
 };
 
-const _confirmFedexDoorTag = id => {
-  if (_checkDigit(id.match(/^DT(\d{12})$/)[1], [3, 1, 7], 11)) {
-    return [true, true];
-  }
-  return [false, false];
-};
-
-const _confirmFedex9622 = id => {
+let _confirmFedex9622 = function(id) {
   if (_checkDigit(id, [3, 1, 7], 11)) {
     return [true, false];
   }
@@ -116,35 +125,28 @@ const _confirmFedex9622 = id => {
   return [false, false];
 };
 
-const _confirmUsps20 = id => {
+let _confirmUsps22 = function(id) {
   if (_checkDigit(id, [3, 1], 10)) {
     return [true, false];
   }
   return [false, false];
 };
 
-const _confirmUsps22 = id => {
+let _confirmUsps26 = function(id) {
   if (_checkDigit(id, [3, 1], 10)) {
     return [true, false];
   }
   return [false, false];
 };
 
-const _confirmUsps26 = id => {
-  if (_checkDigit(id, [3, 1], 10)) {
-    return [true, false];
-  }
-  return [false, false];
-};
-
-const _confirmUsps420Zip = id => {
+let _confirmUsps420Zip = function(id) {
   if (_checkDigit(id.match(/^420\d{5}(\d{22})$/)[1], [3, 1], 10)) {
     return [true, false];
   }
   return [false, false];
 };
 
-const _confirmUsps420ZipPlus4 = id => {
+let _confirmUsps420ZipPlus4 = function(id) {
   if (_checkDigit(id.match(/^420\d{9}(\d{22})$/)[1], [3, 1], 10)) {
     return [true, false];
   } else {
@@ -155,14 +157,14 @@ const _confirmUsps420ZipPlus4 = id => {
   return [false, false];
 };
 
-const _confirmCanadaPost16 = id => {
+let _confirmCanadaPost16 = function(id) {
   if (_checkDigit(id, [3, 1], 10)) {
     return [true, false];
   }
   return [false, false];
 };
 
-const _confirmA1International = id => {
+let _confirmA1International = function(id) {
   if (id.length === 9 || id.length === 13) {
     return [true, false];
   }
@@ -340,27 +342,20 @@ const CARRIERS = [
   }
 ];
 
-const _preProcess = id => {
-  return upperCase(id.replace(/\s+/g, ''));
-};
-
 class Guess {
   constructor(id) {
-    let pid = _preProcess(id);
+    const pid = _preprocess(id);
     let carriers = [];
-    CARRIERS.every(carrier => {
-      let good, stop, _ref;
-      if (pid.match(carrier.regex)) {
-        if (carrier.confirm != null) {
-          _ref = carrier.confirm(pid);
-          good = _ref[0];
-          stop = _ref[1];
+    CARRIERS.every(function(c) {
+      if (id.match(c.regex)) {
+        if (c.confirm != null) {
+          let [good, stop] = Array.from(c.confirm(id));
           if (good) {
-            carriers.push(carrier.name);
+            carriers.push(c.name);
           }
           return !stop;
         }
-        carriers.push(carrer.name);
+        carriers.push(c.name);
         return true;
       }
       return true;
