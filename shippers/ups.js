@@ -42,10 +42,6 @@ const _buildTrackingRequest = function(data, options) {
   return root.end({ pretty: options.pretty });
 };
 
-const _handleResponse = function(res, callback) {
-  return callback(null, res);
-};
-
 const _doRequest = function(reqBody, options, id) {
   return new Promise((resolve, reject) => {
     let authorize = _buildAccessRequest(options);
