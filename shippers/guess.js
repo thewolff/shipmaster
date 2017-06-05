@@ -5,6 +5,13 @@ const _ = require('lodash');
 const upperCase = require('change-case').upperCase;
 const uniq = require('lodash').uniq;
 
+const trueTrueArr = [true, true];
+const trueFalseArr = [true, false];
+const falseFalseArr = [false, false];
+let multi1 = [3, 1];
+let multi2 = [...multi1, 7];
+let multi3 = [...multi1].reverse();
+
 let _preprocess = id => upperCase(id.replace(/\s+/g, ''));
 
 let _confirmUps = function(id) {
@@ -26,9 +33,9 @@ let _confirmUps = function(id) {
 
   let checkdigit = sum % 10 > 0 ? 10 - sum % 10 : 0;
   if (checkdigit === parseInt(id[17], 10)) {
-    return [true, true];
+    return trueTrueArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _checkDigit = function(id, multipliers, mod) {
@@ -62,113 +69,113 @@ let _confirmUpsFreight = function(id) {
   let firstChar = `${(id.charCodeAt(0) - 63) % 10}`;
   let remaining = id.slice(1);
   id = `${firstChar}${remaining}`;
-  if (_checkDigit(id, [3, 1, 7], 10)) {
-    return [true, true];
+  if (_checkDigit(id, multi2, 10)) {
+    return trueTrueArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmFedex12 = function(id) {
-  if (_checkDigit(id, [3, 1, 7], 11)) {
-    return [true, false];
+  if (_checkDigit(id, multi2, 11)) {
+    return trueFalseArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmFedexDoorTag = function(id) {
-  if (_checkDigit(id.match(/^DT(\d{12})$/)[1], [3, 1, 7], 11)) {
-    return [true, true];
+  if (_checkDigit(id.match(/^DT(\d{12})$/)[1], multi2, 11)) {
+    return trueTrueArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmFedexSmartPost = function(id) {
-  if (_checkDigit(`91${id}`, [3, 1], 10)) {
-    return [true, false];
+  if (_checkDigit(`91${id}`, multi1, 10)) {
+    return trueFalseArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmFedex15 = function(id) {
-  if (_checkDigit(id, [1, 3], 10)) {
-    return [true, false];
+  if (_checkDigit(id, multi3, 10)) {
+    return trueFalseArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmFedex20 = function(id) {
-  if (_checkDigit(id, [3, 1, 7], 11)) {
-    return [true, false];
+  if (_checkDigit(id, multi2, 11)) {
+    return trueFalseArr;
   } else {
     let alteredId = `92${id}`;
-    if (_checkDigit(alteredId, [3, 1], 10)) {
-      return [true, false];
+    if (_checkDigit(alteredId, multi1, 10)) {
+      return trueFalseArr;
     }
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmUsps20 = function(id) {
-  if (_checkDigit(id, [3, 1], 10)) {
-    return [true, false];
+  if (_checkDigit(id, multi1, 10)) {
+    return trueFalseArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmFedex9622 = function(id) {
-  if (_checkDigit(id, [3, 1, 7], 11)) {
-    return [true, false];
+  if (_checkDigit(id, multi2, 11)) {
+    return trueFalseArr;
   }
-  if (_checkDigit(id.slice(7), [1, 3], 10)) {
-    return [true, false];
+  if (_checkDigit(id.slice(7), multi3, 10)) {
+    return trueFalseArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmUsps22 = function(id) {
-  if (_checkDigit(id, [3, 1], 10)) {
-    return [true, false];
+  if (_checkDigit(id, multi1, 10)) {
+    return trueFalseArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmUsps26 = function(id) {
-  if (_checkDigit(id, [3, 1], 10)) {
-    return [true, false];
+  if (_checkDigit(id, multi1, 10)) {
+    return trueFalseArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmUsps420Zip = function(id) {
-  if (_checkDigit(id.match(/^420\d{5}(\d{22})$/)[1], [3, 1], 10)) {
-    return [true, false];
+  if (_checkDigit(id.match(/^420\d{5}(\d{22})$/)[1], multi1, 10)) {
+    return trueFalseArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmUsps420ZipPlus4 = function(id) {
-  if (_checkDigit(id.match(/^420\d{9}(\d{22})$/)[1], [3, 1], 10)) {
-    return [true, false];
+  if (_checkDigit(id.match(/^420\d{9}(\d{22})$/)[1], multi1, 10)) {
+    return trueFalseArr;
   } else {
-    if (_checkDigit(id.match(/^420\d{5}(\d{26})$/)[1], [3, 1], 10)) {
-      return [true, false];
+    if (_checkDigit(id.match(/^420\d{5}(\d{26})$/)[1], multi1, 10)) {
+      return trueFalseArr;
     }
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmCanadaPost16 = function(id) {
-  if (_checkDigit(id, [3, 1], 10)) {
-    return [true, false];
+  if (_checkDigit(id, multi1, 10)) {
+    return trueFalseArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 let _confirmA1International = function(id) {
   if (id.length === 9 || id.length === 13) {
-    return [true, false];
+    return trueFalseArr;
   }
-  return [false, false];
+  return falseFalseArr;
 };
 
 const CARRIERS = [
